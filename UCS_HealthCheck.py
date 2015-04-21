@@ -334,7 +334,6 @@ def write_html_fault_open():
 	return
 
 def write_html_fault_body(fault_name,fault_sev,fault_desc):
-	print "html write of fault " + fault_name
 	html_out.write("<tr>\
 						<td>%s</td>\
 						<td>%s</td>\
