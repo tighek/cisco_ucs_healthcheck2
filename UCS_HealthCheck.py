@@ -20,6 +20,14 @@
 # -i IP, --ip=IP    UCSM IP Address
 #
 
+#  Configuration Items  -  Set these for your system.
+#
+#  Set the output directory and file name
+#
+# output_dir = "/var/www/"
+# output_file = "ucs_health_check_report.html"
+
+
 # from pprint import pprint
 from UcsSdk import *
 from UcsSdk.MoMeta.NetworkElement import NetworkElement
@@ -512,7 +520,17 @@ if __name__ == "__main__":
 		# Open the HTML file for writing
 		#
 		
-		html_out = open("health_check_report.html", "w")
+		try:
+			output_dir
+		except NameError:
+			output_dir = "./"
+		
+		try:
+			output_file
+		except NameError:
+			output_file = "ucs_health_check_report.html"
+		
+		html_out = open(output_dir+output_file, "w")
 		write_html_head()
 
 		#
