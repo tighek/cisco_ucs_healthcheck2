@@ -445,13 +445,11 @@ if __name__ == "__main__":
 
 		#
 		#
-		# Test Credentials
+		# Test Credentials for dev so you're not prompted for UCSM details.
 		#
-		# Remove before publishing
-		#
-		options.ip = "10.90.5.20"
-		options.userName = "readonly"
-		options.password = "readonly"
+		# options.ip = "10.90.5.20"
+		# options.userName = "readonly"
+		# options.password = "readonly"
 
 		#
 		# Print the welcome banner.
