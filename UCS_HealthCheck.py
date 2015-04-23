@@ -29,7 +29,7 @@
 
 
 # from pprint import pprint
-from UcsSdk import *
+#from UcsSdk import *
 from UcsSdk.MoMeta.NetworkElement import NetworkElement
 from UcsSdk.MoMeta.TopSystem import TopSystem
 from UcsSdk.MoMeta.DomainEnvironmentFeature import DomainEnvironmentFeature
@@ -39,6 +39,7 @@ from UcsSdk.MoMeta.ComputeBlade import ComputeBlade
 from UcsSdk.MoMeta.EquipmentIOCard import EquipmentIOCard
 from UcsSdk.MoMeta.FirmwareBootUnit import FirmwareBootUnit
 from UcsSdk.MoMeta.FaultInst import FaultInst
+import datetime
 import os
 import getpass
 import optparse
@@ -536,6 +537,10 @@ if __name__ == "__main__":
 		#
 		# Show Domain information.
 		#
+
+		start_time = datetime.now()
+		
+		
 
 		write_html_domain_open()
 		get_domain(handle)
