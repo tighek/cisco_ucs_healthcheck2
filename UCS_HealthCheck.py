@@ -27,9 +27,28 @@
 # output_dir = "/var/www/"
 # output_file = "ucs_health_check_report.html"
 
+# Section Operation and Terminal Output Verbosity
+#
+# dev_key is parsed per digit for what to do
+#
+# 0 = Disabled
+# 1 = Normal Operation
+# 2 = Verbose Output To Terminal
+#
+# Sections are:
+#
+# 1. Domain
+# 2. FI
+# 3. IOM
+# 4. Chassis
+# 5. Blade
+# 6. Fault
+
+dev_key = "111111"
+
 
 # from pprint import pprint
-#from UcsSdk import *
+from UcsSdk import *
 from UcsSdk.MoMeta.NetworkElement import NetworkElement
 from UcsSdk.MoMeta.TopSystem import TopSystem
 from UcsSdk.MoMeta.DomainEnvironmentFeature import DomainEnvironmentFeature
@@ -40,6 +59,7 @@ from UcsSdk.MoMeta.EquipmentIOCard import EquipmentIOCard
 from UcsSdk.MoMeta.FirmwareBootUnit import FirmwareBootUnit
 from UcsSdk.MoMeta.FaultInst import FaultInst
 import datetime
+import time
 import os
 import getpass
 import optparse
@@ -198,9 +218,6 @@ def write_html_head():
 #	return hamode
 
 def write_html_fi_open():
-	print ""
-	print "Fabric Interconnects"
-	print ""
 	html_out.write("<section id=\"fabricinterconnect\">\
 					<h2><a href=\"#fabricinterconnect\">Fabric Interconnect</a></h2>\
 					<table class=\"border\">\
@@ -221,9 +238,6 @@ def write_html_fi_body(fi_name,fi_oobip,fi_serial,fi_model,fi_version):
 	return
 
 def write_html_iom_open():
-	print ""
-	print "IO Modules"
-	print ""
 	html_out.write("<section id=\"iom\">\
 					<h2><a href=\"#iom\">IO Module</a></h2>\
 					<table class=\"border\">\
@@ -244,9 +258,6 @@ def write_html_iom_body(iom_chassisid,iom_switchid,iom_model,iom_serial,iom_runv
 	return
 
 def write_html_chassis_open():
-	print ""
-	print "Chassis"
-	print ""
 	html_out.write("<section id=\"chassis\">\
 					<h2><a href=\"#chassis\">Chassis</a></h2>\
 					<table class=\"border\">\
@@ -257,9 +268,6 @@ def write_html_chassis_open():
 	return
 
 def write_html_chassis_body(chassis_name,chassis_serial,chassis_model):
-	print ""
-	print "Chassis"
-	print ""
 	html_out.write("<tr>\
 						<td>%s</td>\
 						<td>%s</td>\
@@ -269,9 +277,6 @@ def write_html_chassis_body(chassis_name,chassis_serial,chassis_model):
 	return
 
 def write_html_blade_open():
-	print ""
-	print "Blades"
-	print ""
 	html_out.write("<section id=\"blade\">\
 					<h2><a href=\"#blade\">Blade</a></h2>\
 					<table class=\"border\">\
@@ -282,9 +287,6 @@ def write_html_blade_open():
 	return
 
 def write_html_blade_body(blade_name,blade_serial,blade_model,blade_assignedto,blade_memory,blade_runver,blade_prevver):
-	print ""
-	print "Chassis"
-	print ""
 	html_out.write("<tr>\
 						<td>%s</td>\
 						<td>%s</td>\
@@ -330,9 +332,6 @@ def write_html_end_doc():
 	return
 
 def write_html_fault_open():
-	print ""
-	print "Faults"
-	print ""
 	html_out.write("<section id=\"fault\">\
 					<h2><a href=\"#fault\">Fault</a></h2>\
 					<table class=\"border\">\
@@ -352,8 +351,10 @@ def write_html_fault_body(fault_name,fault_sev,fault_desc):
 
 def get_fi(handle):
 	key = 1
+	print ""
 	for fi in handle.GetManagedObject(None, NetworkElement.ClassId()):
-		print "Getting " + fi.Rn
+		sys.stdout.write("\r" + "Getting " + fi.Rn)
+		sys.stdout.flush()
 		fi_model = handle.GetManagedObject(None, EquipmentManufacturingDef.ClassId(), {"Pid": fi.Model})
 		fi_code = handle.GetManagedObject(None, FirmwareBootUnit.ClassId())
 		fi_details[key] = {
@@ -368,8 +369,10 @@ def get_fi(handle):
 
 def get_iom(handle):
 	key = 1
+	print ""
 	for iom in handle.GetManagedObject(None, EquipmentIOCard.ClassId()):
-		print "Getting Chassis " + iom.ChassisId + " " + iom.Rn
+		sys.stdout.write("\r" + "Getting Chassis " + iom.ChassisId + " " + iom.Rn)
+		sys.stdout.flush()
 		iom_model = handle.GetManagedObject(None, EquipmentManufacturingDef.ClassId(), {"Pid": iom.Model})
 		iom_code = handle.GetManagedObject(None, FirmwareBootUnit.ClassId())
 		iom_details[key] = {
@@ -386,8 +389,10 @@ def get_iom(handle):
 
 def get_chassis(handle):
 	key = 1
+	print ""
 	for chassis in handle.GetManagedObject(None, EquipmentChassis.ClassId()):
-		print "Getting Chassis " + chassis.Dn
+		sys.stdout.write("\r" + "Getting Chassis " + chassis.Dn)
+		sys.stdout.flush()
 		chassis_model = handle.GetManagedObject(None, EquipmentManufacturingDef.ClassId(), {"Pid": chassis.Model})
 		chassis_details[key] = {
 			'dev_type' : "Chassis",
@@ -399,8 +404,10 @@ def get_chassis(handle):
 
 def get_blade(handle):
 	key = 1
+	print ""
 	for blade in handle.GetManagedObject(None, ComputeBlade.ClassId()):
-		print "Getting Blade " + blade.Dn
+		sys.stdout.write("\r" + "Getting Blade " + blade.Dn)
+		sys.stdout.flush()
 		blade_model = handle.GetManagedObject(None, EquipmentManufacturingDef.ClassId(), {"Pid": blade.Model})
 		blade_code = handle.GetManagedObject(None, FirmwareBootUnit.ClassId())
 		blade_details[key] = {
@@ -417,8 +424,10 @@ def get_blade(handle):
 		
 def get_domain(handle):
 	key = 1
+	print ""
 	for domain in handle.GetManagedObject(None, TopSystem.ClassId()):
-		print "Getting Domain " + domain.Name
+		sys.stdout.write("\r" + "Getting Domain " + domain.Name)
+		sys.stdout.flush()
 		domain_details[key] = {
 			'name' : domain.Name,
 			'address' : domain.Address,
@@ -429,8 +438,10 @@ def get_domain(handle):
 
 def get_fault(handle):
 	key = 1
+	print ""
 	for fault in handle.GetManagedObject(None, FaultInst.ClassId()):
-		print "Getting Faults for " + fault.Dn
+		sys.stdout.write("\r" + "Getting Faults for " + fault.Dn)
+		sys.stdout.flush()
 		fault_details[key] = {
 			'name' : fault.Dn,
 			'sev' : fault.Severity,
@@ -442,9 +453,7 @@ def get_fault(handle):
 if __name__ == "__main__":
 	try:
 
-		#
 		# Parse for command line arguments.
-		#
 
 		parser = optparse.OptionParser()
 		parser.add_option('-i', '--ip', dest="ip", help="UCSM IP Address")
@@ -453,52 +462,41 @@ if __name__ == "__main__":
 		(options, args) = parser.parse_args()
 
 		#
-		#
 		# Test Credentials for dev so you're not prompted for UCSM details.
 		#
-		# options.ip = "10.90.5.20"
-		# options.userName = "readonly"
-		# options.password = "readonly"
+		options.ip = "10.90.5.20"
+		options.userName = "readonly"
+		options.password = "readonly"
 
-		#
 		# Print the welcome banner.
-		#
 
 		print ""
 		print ""
 		print "Welcome To The UCS Health Check Script"
 		print ""
 
-		#
 		# Check for a command line IP, if not prompt for it.
-		#
 
 		if options.ip:
 			print "Connecting to UCS Manager at address " + options.ip
 		elif not options.ip:
 			options.ip = raw_input("UCS Manager IP Address: ")
 
-		#
 		# Check for a command line username, if not prompt for it.
-		#
 
 		if options.userName:
 			print "Logging in as " + options.userName
 		elif not options.userName:
 			options.userName = raw_input("UCS Manager Read Only Username: ")
 
-		#
 		# Check for a command line password, if not prompt for it.
-		#
 
 		if options.password:
 			print "Thanks for providing the password."
 		elif not options.password:
 			options.password = getpassword("UCS Manager Password: ")
 
-		#
 		# Create the connection to the UCS Domain.
-		#
 
 		domain_details = {}
 		domain_vals = {}
@@ -517,9 +515,7 @@ if __name__ == "__main__":
 		handle.Login(options.ip, options.userName, options.password)
 		handle.StartTransaction()
 
-		#
 		# Open the HTML file for writing
-		#
 		
 		try:
 			output_dir
@@ -534,120 +530,111 @@ if __name__ == "__main__":
 		html_out = open(output_dir+output_file, "w")
 		write_html_head()
 
-		#
 		# Show Domain information.
-		#
 
-		start_time = datetime.now()
-		
-		
+#		start_time = datetime.now()
+
 
 		write_html_domain_open()
-		get_domain(handle)
-		domain_vals = domain_details.items()
-		for seq, domain in domain_vals:
-			print ("Domain Name: " + domain['name'] + " at address " + domain['address'] + " owned by " + domain['owner'] \
-				+ " has been up for " + domain['uptime'])
-			write_html_domain_body(domain['name'], domain['address'], domain['owner'], domain['uptime'])
+		if dev_key[0] == "1" or dev_key[0] == "2":
+			get_domain(handle)
+			domain_vals = domain_details.items()
+			for seq, domain in domain_vals:
+				if dev_key[0] == "2":
+					print ("Domain Name: " + domain['name'] + " at address " + domain['address'] + " owned by " + domain['owner'] \
+						+ " has been up for " + domain['uptime'])
+				write_html_domain_body(domain['name'], domain['address'], domain['owner'], domain['uptime'])
 		write_html_domain_close()
 
-		#
 		#  Begin colapsed details.
-		#
 
 		html_out.write("<article class=\"accordion\">")
 
-		#
 		#  Fabric Interconnects
-		#
 
 		write_html_fi_open()
-		get_fi(handle)
-		fi_vals = fi_details.items()
-		for seq, fi in fi_vals:			
-			print ("FI: " + fi['name'] +\
-				"  Address: " + fi['oobip'] +\
-				"  SN: " + fi['serial'] +\
-				"  Model: " + fi['model'] +\
-				"  Version: " + fi['version'])
-			write_html_fi_body(fi['name'], fi['oobip'], fi['serial'], fi['model'], fi['version'])
+		if dev_key[1] == "1" or dev_key[1] == "2":
+			get_fi(handle)
+			fi_vals = fi_details.items()
+			for seq, fi in fi_vals:			
+				if dev_key[1] == "2":
+					print ("FI: " + fi['name'] +\
+						"  Address: " + fi['oobip'] +\
+						"  SN: " + fi['serial'] +\
+						"  Model: " + fi['model'] +\
+						"  Version: " + fi['version'])
+				write_html_fi_body(fi['name'], fi['oobip'], fi['serial'], fi['model'], fi['version'])
 		write_html_tbody_table_section_close()
 
-		#
 		#  IO Modules
-		#
 
 		write_html_iom_open()
-		get_iom(handle)
-		iom_vals = iom_details.items()
-		for seq, iom in iom_vals:
-			print ("Chassis ID:" + iom['chassisid'] +\
-				" Fabric ID: " + iom['switchid'] + " ("+ iom['fabricside'] + ")" +\
-				" Model: " + iom['model'] +\
-				" Serial: " + iom['serial'] +\
-				" Running Ver: " + iom['runver'] +\
-				" Previous Ver: " + iom['prevver'])
-			write_html_iom_body(iom['chassisid'], iom['switchid'], iom['model'], iom['serial'], iom['runver'], iom['prevver'])
+		if dev_key[2] == "1" or dev_key[2] == "2":
+			get_iom(handle)
+			iom_vals = iom_details.items()
+			for seq, iom in iom_vals:
+				if dev_key[2] == "2":
+					print ("Chassis ID:" + iom['chassisid'] +\
+						" Fabric ID: " + iom['switchid'] + " ("+ iom['fabricside'] + ")" +\
+						" Model: " + iom['model'] +\
+						" Serial: " + iom['serial'] +\
+						" Running Ver: " + iom['runver'] +\
+						" Previous Ver: " + iom['prevver'])
+				write_html_iom_body(iom['chassisid'], iom['switchid'], iom['model'], iom['serial'], iom['runver'], iom['prevver'])
 		write_html_tbody_table_section_close()
 
-		#
 		#  Chassis
-		#
 
 		write_html_chassis_open()
-		get_chassis(handle)
-		chassis_vals = chassis_details.items()
-		for seq, chassis in chassis_vals:
-			print ("Name: " + chassis['name'] +\
-				" Serial Number: " + chassis['serial'] +\
-				" Model: " + chassis['model'])
-#			html_out.write("<tr><td>%s</td><td>%s</td><td>%s</td></tr>" % (chassis.Dn, chassis.Serial, chassis.Model))
-			write_html_chassis_body(chassis['name'], chassis['serial'], chassis['model'])
+		if dev_key[3] == "1" or dev_key[3] == "2":
+			get_chassis(handle)
+			chassis_vals = chassis_details.items()
+			for seq, chassis in chassis_vals:
+				if dev_key[3] == "2":
+					print ("Name: " + chassis['name'] +\
+						" Serial Number: " + chassis['serial'] +\
+						" Model: " + chassis['model'])
+				write_html_chassis_body(chassis['name'], chassis['serial'], chassis['model'])
 		write_html_tbody_table_section_close()
 
-		#
 		#  Blades
-		#
 
 		write_html_blade_open()
-		get_blade(handle)
-		blade_vals = blade_details.items()
-		for seq, blade in blade_vals:
-			print ("Name: " + blade['name'] +\
-				" Serial Number: " + blade['serial'] +\
-				" Model: " + blade['model'] +\
-				" Assigned To: " + blade['assignedto'] +\
-				" Memory: " + blade['memory'] +\
-				" Running Version: " + blade['runver'] +\
-				" Backup Version: " + blade['prevver'])
-			write_html_blade_body(blade['name'], blade['serial'], blade['model'], blade['assignedto'], blade['memory'], blade['runver'], blade['prevver'])
+		if dev_key[4] == "1" or dev_key[4] == "2":
+			get_blade(handle)
+			blade_vals = blade_details.items()
+			for seq, blade in blade_vals:
+				if dev_key[4] == "2":
+					print ("Name: " + blade['name'] +\
+						" Serial Number: " + blade['serial'] +\
+						" Model: " + blade['model'] +\
+						" Assigned To: " + blade['assignedto'] +\
+						" Memory: " + blade['memory'] +\
+						" Running Version: " + blade['runver'] +\
+						" Backup Version: " + blade['prevver'])
+				write_html_blade_body(blade['name'], blade['serial'], blade['model'], blade['assignedto'], blade['memory'], blade['runver'], blade['prevver'])
 		write_html_tbody_table_section_close()
 		
-		
-		#
 		#  Faults
-		#
 
 		write_html_fault_open()
-		get_fault(handle)
-		fault_vals = fault_details.items()
-		for seq, fault in fault_vals:
-			print ("Name: " + fault['name'] +\
-				"  Severity: " + fault['sev'] +\
-				"  Desc: " + fault['desc'])
-			write_html_fault_body(fault['name'], fault['sev'], fault['desc'])
+		if dev_key[5] == "1" or dev_key[5] == "2":
+			get_fault(handle)
+			fault_vals = fault_details.items()
+			for seq, fault in fault_vals:
+				if dev_key[5] == "2":
+					print ("Name: " + fault['name'] +\
+						"  Severity: " + fault['sev'] +\
+						"  Desc: " + fault['desc'])
+				write_html_fault_body(fault['name'], fault['sev'], fault['desc'])
 		write_html_tbody_table_section_close()
 
-		#
 		#  Close HTML Doc
-		#
 
 		write_html_end_doc()
 		html_out.close()
 
-		#
 		#  Close the UCS connection.
-		#
 
 		handle.CompleteTransaction()
 		handle.Logout()
